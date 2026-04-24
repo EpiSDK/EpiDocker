@@ -1,124 +1,46 @@
 # EpiDocker
 
-Image Docker Alpine preconfiguree pour disposer rapidement de l'ecosysteme Epiclang:
+Docker image based on Alpine Linux to prepare a build and runtime environment around [Epifaster](https://github.com/lukas-sgx/Epifaster) and [Criterion](https://github.com/Snaipe/Criterion).
 
-- Epiclang (depuis Epifaster)
-- Criterion (framework de tests C)
-- Outils de build C/C++ modernes (clang, cmake, meson, ninja, make)
+## Image Contents
 
-Le but du projet est simple: fournir un environnement reproductible pour compiler, tester et executer des projets C avec Epiclang, sans configurer manuellement chaque dependance.
+The image installs:
 
-Il est aussi pensé pour l'optimisation de temps, notamment dans les pipelines GitHub Actions, en evitant de refaire toute la configuration d'outils a chaque setup CI.
+- `clang20` and `clang20-rtlib`
+- `make`, `build-base`, `cmake`, `meson`, `ninja`
+- `gcovr`
+- `libffi-dev` and `libgit2-dev`
+- Criterion, built and installed from source
+- Epifaster, cloned from the official GitHub repository
+- the `epiclang` binary available in `/usr/bin/epiclang`
+- the plugins copied to `/usr/lib/epiclang/`
 
-## Apercu
-
-Ce projet construit une image qui:
-
-1. Part de `alpine`.
-2. Installe la toolchain necessaire (clang20, make, cmake, meson, ninja, etc.).
-3. Clone et installe Criterion.
-4. Clone Epifaster et installe `epiclang` dans le systeme.
-5. Nettoie les dependances de build pour reduire la taille finale de l'image.
-
-## Prerequis
-
-- Docker installe sur ta machine
-
-## Build de l'image
-
-Depuis la racine du projet:
+## Build
 
 ```bash
-docker build -t epidocker:latest .
+docker build -t epi-docker:tek1 .
 ```
 
-## Utilisation rapide
+## Usage
 
-Lancer un shell interactif dans le conteneur:
+The final image exposes the `epiclang` executable in the `PATH`.
+
+Example:
 
 ```bash
-docker run --rm -it epidocker:latest sh
+docker run --rm -it epi-docker:tek1 epiclang --help
 ```
 
-Verifier les outils principaux:
+## Notes
 
-```bash
-epiclang --help
-clang --version
-```
+- The build clones `Epifaster` and `Criterion` directly from GitHub during image construction.
+- The image removes build dependencies after installation to keep the final size smaller.
+- This project does not yet contain a run script or application source code outside of the `Dockerfile`.
 
-Monter un projet local dans le conteneur:
-
-```bash
-docker run --rm -it \
-	-v "$(pwd)":/workspace \
-	-w /workspace \
-	epidocker:latest sh
-```
-
-## Optimisation pour GitHub Actions
-
-Cette image est particulierement utile en CI pour reduire le temps de preparation des jobs.
-En centralisant les dependances de build dans une image Docker prete a l'emploi, tu limites les etapes repetitives d'installation dans GitHub Actions et tu rends les executions plus stables.
-
-## Ce que contient l'image
-
-- Base: Alpine Linux
-- Compilation: clang20, clang20-rtlib, build-base, make
-- Build system: cmake, meson, ninja
-- Outils annexes: gcovr, libffi-dev, libgit2-dev
-- Tests: Criterion compile et installe
-- Langage: `epiclang` installe dans `/usr/bin/epiclang`
-
-## Structure du projet
+## Project Structure
 
 ```text
 .
 ├── Dockerfile
 └── README.md
 ```
-
-## Exemple de workflow
-
-1. Construire l'image.
-2. Monter ton dossier de projet avec `-v`.
-3. Compiler et tester dans le conteneur.
-
-Exemple:
-
-```bash
-docker build -t epidocker:latest .
-docker run --rm -it -v "$(pwd)":/workspace -w /workspace epidocker:latest sh
-# puis dans le conteneur:
-# make
-# epiclang ...
-```
-
-## Depannage
-
-- `epiclang: not found`
-	- Verifie que tu lances bien une image construite a partir de ce Dockerfile.
-	- Teste `ls -l /usr/bin/epiclang` dans le conteneur.
-
-- Probleme reseau pendant le build (clone GitHub)
-	- Relance le build:
-
-```bash
-docker build --no-cache -t epidocker:latest .
-```
-
-- Permission denied sur les fichiers montes
-	- Lance le conteneur avec un utilisateur compatible avec ton host si necessaire.
-
-## Personnalisation
-
-Tu peux adapter facilement l'image en modifiant [Dockerfile](Dockerfile):
-
-- Ajouter des paquets Alpine supplementaires.
-- Epingler des commits/tags precis pour Epifaster et Criterion.
-- Ajouter un `ENTRYPOINT` selon ton workflow.
-
-## Licence
-
-Ce depot ne fournit que la configuration Docker de l'environnement.
-Les licences des projets tiers (Epifaster, Criterion, Alpine et dependances) s'appliquent a leurs composants respectifs.
