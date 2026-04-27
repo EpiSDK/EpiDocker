@@ -40,7 +40,7 @@ docker run --rm -it epi-docker:tek1 epiclang --help
 
 ## Performance
 
-- In CI, builds using EpiDocker complete in 27 seconds, compared to 1 minute and 15 seconds. (On average)
+- Step from 1m 30 to 15s to setup it on github actions
 
 ## Project Structure
 
