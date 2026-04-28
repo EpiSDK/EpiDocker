@@ -24,5 +24,3 @@ RUN mkdir -p /usr/lib/epiclang/ && \
 
 RUN apk del git build-base meson ninja \
 	&& rm -rf /app/Epifaster/.git /var/cache/apk/* /app/Criterion
-
-COPY banana-check-repo.sh /usr/bin/banana-check-repo
