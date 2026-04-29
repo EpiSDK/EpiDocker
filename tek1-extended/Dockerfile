@@ -15,6 +15,7 @@ RUN meson setup build && \
 
 WORKDIR /app/Epifaster
 RUN ln -s /usr/bin/clang-20 /usr/bin/clang
+RUN ln -s /usr/bin/llvm20-cov /usr/bin/llvm-cov-20
 
 RUN mkdir -p /usr/lib/epiclang/ && \
     cp -r ./plugins /usr/lib/epiclang/ && \
